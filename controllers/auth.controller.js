@@ -7,9 +7,16 @@ const signup = async (req, res) => {
     const { email, password, name } = req.body;
 
     try {
+        // Check if a user with the given email already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(404).json({ message: 'Email already in use' });
+        }
+
         // Hash the user's password before saving to the database
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({ email, password: hashedPassword, name });
+
         await newUser.save();
         res.status(201).json({ message: 'User created successfully' });
     } catch (error) {
